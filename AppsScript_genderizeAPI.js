@@ -1,5 +1,7 @@
-var yourSpreadsheetId = '1sAIW06hhSkedsdg32w55JRtLIi7McnEEzQ4Px4-s7u4l-rY';
+var yourSpreadsheetId = 'setwg345345263236236wdg234-s7u4l-rY';
 var yourSheetName = 'Sheet1';
+
+var startResColNum = 3;
 
 var ss = SpreadsheetApp.openById(yourSpreadsheetId);
 var s1 = ss.getSheetByName(yourSheetName);
@@ -14,21 +16,24 @@ function getLastRowInCol(n){ //this function lets the script know where it last 
   }
 }
 
-function getNamesFromTable(){
-  var lastRow = s1.getLastRow()
-  var startRow = getLastRowInCol(4);
+function getNamesFromTable(){ //this is the function to execute
+  var lastRow = s1.getLastRow();
+  var startRow = getLastRowInCol(startResColNum);
 
   var difOfStart2Last =  lastRow - startRow;
-  var rowsToRun = (difOfStart2Last > 50) ? 50 : (difOfStart2Last + 1);
+  var rowsToRun = (difOfStart2Last > 25) ? 25 : (difOfStart2Last + 1);
 
   var next25 = s1.getRange(startRow,1,rowsToRun,1).getValues();
 
   var urls = [];
+
   for(var i=0; i<next25.length; i++){
     urls.push("https://api.genderize.io/?name="+next25[i][0])
   }
+
   var res = UrlFetchApp.fetchAll(urls);
   var resArr = res.map(function(m){ return JSON.parse(m)});
+
   var arr2sheet = resArr.map(function(d){ 
     var name = d.name ? d.name : 'not found';
     var gender = d.gender ? d.gender : 'not found';
@@ -37,7 +42,6 @@ function getNamesFromTable(){
     return [name, gender, probability, count];
   });
 
-  s1.getRange(startRow,3,arr2sheet.length, arr2sheet[0].length).setValues(arr2sheet);
+  s1.getRange(startRow,startResColNum,arr2sheet.length, arr2sheet[0].length).setValues(arr2sheet);
 
 }
-
